@@ -7,6 +7,7 @@
 1. **Synchronous Network**: 
     1. all nodes share a global clock, time steps from $0, 1, 2, ...$.
     1. the message sent from time $t$ will be arrived at time $t+1$ (in some arbitrary order).
+1. **Node Failure**: there are $f$ number of nodes that can be byzantine.
 
 ## References
 
