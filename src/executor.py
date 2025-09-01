@@ -1,0 +1,31 @@
+import re
+import logging
+
+class Executor:
+    def __init__(self, history, recordPattern):
+        self.register = 0
+        self.history = history
+        self.recordPattern = recordPattern
+        self.head = 0
+
+    def run(self):
+        # recordPattern = r"([+-*/]):(\d+)"
+        while True:
+            if self.head < len(self.history):
+                record = self.history.getRecord(self.head)
+                match = re.search(self.recordPattern, record)
+                operator = match.group(1)
+                operand = int(match.group(2))
+
+                if operator == "+":
+                    self.register += operand
+                elif operator == "-":
+                    self.register -= operand
+                elif operator == "*":
+                    self.register *= operand
+                elif operator == "/":
+                    self.register /= operand
+                else:
+                    logging.error(f"Invalid operator: {operator}")
+
+                self.head += 1
