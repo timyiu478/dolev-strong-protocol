@@ -25,7 +25,7 @@ class Message:
 
 
 class Beacon:
-    def __init__(self, history, recordPattern, id, peers, leader, f, ca, network):
+    def __init__(self, history, recordPattern, id, peers, leader, f, ca, socket):
         self.history = history
         self.recordPattern = recordPattern
         self.id = id
@@ -33,7 +33,7 @@ class Beacon:
         self.leader = leader  # fixed leader mode
         self.f = f  # number of byzantine node
         self.ca = ca
-        self.network = network  # synchronous network
+        self.socket = socket  # socket for sending(receiving) message to(from) synchronous network
         self.session = None  # session data
         self.broadcastQueue = []
 
