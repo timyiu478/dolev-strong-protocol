@@ -1,14 +1,27 @@
 class Signature:
     def __init__(self, sig, nonce):
+        self.sig = sig
+        self.nonce = nonce
 
 
 class SigManager:
-    def __init__(self, ca):
-        self.ca = ca
+    def __init__(self):
         self.nonce = 0
 
     def sign(self, message, key):
-        pass
+        digest = message.digest()
+        nonce = self.nonce
+        digest += nonce.to_bytes(8, 'big')
+        sig = pow(int.from_bytes(digest, 'big'), key.d, key.n)
 
-    def verify(self, signature):
-        pass
+        self.nonce += 1
+
+        return Signature(sig, nonce)
+
+
+    def verify(self, message, signature, key):
+        digest = message.digest()
+        digest += signature.nonce.to_bytes(8, 'big')
+        sig = pow(signature.sig, key.e, key.n)
+
+        return sig == int.from_bytes(digest, 'big') 
