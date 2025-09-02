@@ -13,19 +13,21 @@ class Executor:
         while True:
             if self.head < len(self.history):
                 record = self.history.getRecord(self.head)
-                match = re.search(self.recordPattern, record)
-                operator = match.group(1)
-                operand = int(match.group(2))
-
-                if operator == "+":
-                    self.register += operand
-                elif operator == "-":
-                    self.register -= operand
-                elif operator == "*":
-                    self.register *= operand
-                elif operator == "/":
-                    self.register /= operand
-                else:
-                    logging.error(f"Invalid operator: {operator}")
-
+                self.apply(record)
                 self.head += 1
+
+    def apply(self, record):
+        match = re.search(self.recordPattern, record)
+        operator = match.group(1)
+        operand = int(match.group(2))
+
+        if operator == "+":
+            self.register += operand
+        elif operator == "-":
+            self.register -= operand
+        elif operator == "*":
+            self.register *= operand
+        elif operator == "/":
+            self.register /= operand
+        else:
+            logging.error(f"Invalid operator: {operator}")

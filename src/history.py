@@ -2,7 +2,7 @@ class History:
     def __init__(self, filename):
         self.history = []
         self.filename = filename
-        self.dirtyIdx = 0 # start index of records that are not saved persistently
+        self.dirtyIdx = 0  # start index of records that are not saved persistently
 
         with open(filename, "r") as file:
             lines = file.readlines()

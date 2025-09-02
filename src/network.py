@@ -15,5 +15,5 @@ class Network:
                 return self.messages[fromm].pop(0)
         return None
 
-    def getMaxDelay(self):
+    def maxDelay(self):
         return self.maxDelay
