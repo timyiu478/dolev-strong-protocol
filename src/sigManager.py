@@ -3,6 +3,9 @@ class Signature:
         self.sig = sig
         self.nonce = nonce
 
+    def digest(self):
+        return f"{self.sig}{self.nonce}".encode()
+
 
 class SigManager:
     def __init__(self):
@@ -18,10 +21,9 @@ class SigManager:
 
         return Signature(sig, nonce)
 
-
     def verify(self, message, signature, key):
         digest = message.digest()
         digest += signature.nonce.to_bytes(8, 'big')
         sig = pow(signature.sig, key.e, key.n)
 
-        return sig == int.from_bytes(digest, 'big') 
+        return sig == int.from_bytes(digest, 'big')
