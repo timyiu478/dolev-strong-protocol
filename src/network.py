@@ -9,6 +9,9 @@ class Socket:
     def receive(self):
         return self.network.receive(self.src)
 
+    def maxDelay(self):
+        return self.network.maxDelay()
+
 
 class Network:
     def __init__(self, maxDelay):
