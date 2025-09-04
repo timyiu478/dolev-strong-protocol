@@ -11,7 +11,7 @@ class Executor:
     def run(self, stopEvent):
         # recordPattern = r"([+-*/]):(\d+)"
         while not stopEvent.is_set():
-            if self.head < len(self.history):
+            if self.head < self.history.getLength():
                 record = self.history.getRecord(self.head)
                 self.apply(record)
                 self.head += 1

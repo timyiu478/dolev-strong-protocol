@@ -9,8 +9,8 @@ class Key:
 
 
 def genKeyPair():
-    p = randprime(2**300, 2**500)
-    q = randprime(2**300, 2**500)
+    p = randprime(2**500, 2**700)
+    q = randprime(2**500, 2**700)
     n = p * q
     phi = (p - 1) * (q - 1)
     e = 65537  # Common choice for e

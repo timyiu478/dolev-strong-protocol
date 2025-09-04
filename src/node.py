@@ -14,7 +14,7 @@ class Node:
                  historyFileName, f, sigManager, ca, network):
         pubKey, priKey = genKeyPair()
         cert = Certificate(id, pubKey)
-        ca.sign(cert)
+        cert.sig = ca.sign(cert)
         socket = network.createSocket(id)
 
         self.history = History(historyFileName)

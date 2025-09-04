@@ -8,7 +8,8 @@ class History:
             lines = file.readlines()
             for line in lines:
                 record = line.strip()
-                self.history.append(record)
+                if len(record) > 0:
+                    self.history.append(record)
             self.dirtyIdx = len(lines)
 
     def appendRecord(self, record):
@@ -19,6 +20,9 @@ class History:
 
     def getHistory(self):
         return self.history
+
+    def getLength(self):
+        return len(self.history)
 
     def save(self):
         with open(self.filename, "a+") as file:

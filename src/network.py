@@ -1,3 +1,5 @@
+import threading
+
 class Socket:
     def __init__(self, network, src):
         self.network = network
@@ -11,20 +13,23 @@ class Socket:
 
 
 class Network:
-    def __init__(self):
+    def __init__(self, peers):
         self.messages = {}
+        for peer in peers:
+            self.messages[peer] = []
 
     def send(self, msg, dst):
-        if dst not in self.messages:
-            self.messages[dst] = [msg]
-        else:
+        lock = threading.Lock()
+        with lock:
             self.messages[dst].append(msg)
 
     def receive(self, addr):
-        if addr in self.messages:
-            if len(self.messages[addr]) > 0:
-                return self.messages[addr].pop(0)
-        return None
+        lock = threading.Lock()
+        with lock:
+            if addr in self.messages:
+                if len(self.messages[addr]) > 0:
+                    return self.messages[addr].pop(0)
+            return None
 
     def createSocket(self, src):
         return Socket(self, src)

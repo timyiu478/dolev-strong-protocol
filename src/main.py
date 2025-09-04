@@ -8,26 +8,27 @@ from node import Node
 from network import Network
 
 import threading
+import time
 
 
-PEERS = [0, 1, 2]
-F = 1
+PEERS = [0, 1, 2, 3, 4]
+F = 2
 LEADER = 0
-ROUNDTW = timedelta(seconds=0.5)
-RECORDPATTERN = r"([+-*/]):(\d+)"
+ROUNDTW = timedelta(seconds=8)
+RECORDPATTERN = r"([+\-\*/]):(\d+)"
 RECORDS = [
-  "+1",
-  "-1",
-  "+1",
-  "*9",
-  "*2",
-  "/18"
+  "+:1",
+  "-:1",
+  "+:1",
+  "*:9",
+  "*:2",
+  "/:18"
 ]
 
 
 def main():
     sigMan = SigManager()
-    net = Network()
+    net = Network(PEERS)
     caPubKey, caPriKey = genKeyPair()
     certAuth = CertAuthority(caPubKey, caPriKey, sigMan)
     nodes = {}
@@ -44,11 +45,13 @@ def main():
     for record in RECORDS:
         nodes[LEADER].beacon.start(record)
 
+    time.sleep(ROUNDTW.total_seconds() * (F + 2) * (len(RECORDS) + 1))
+
     stopEvent.set()
 
     for t in nodeThreads:
         t.join()
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()

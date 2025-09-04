@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import hashlib
 import uuid
 import logging
 import copy
@@ -23,8 +24,9 @@ class Message:
         self.signatures = signatures  # signature chain
 
     def digest(self):
-        return f"{self.sender}{self.sessionId}{self.startTime}\
+        b = f"{self.sender}{self.sessionId}{self.startTime}\
                 {self.record}".encode()
+        return hashlib.sha256(b).digest()
 
 
 class Beacon:
@@ -47,12 +49,12 @@ class Beacon:
     def broadcast(self, message):
         for peer in self.peers:
             if peer != self.id:
-                self.socket.send(self.id, peer, copy.deepcopy(message))
+                self.socket.send(copy.deepcopy(message), peer)
 
     def decide(self):
         # decide to append nothing if |accepted values| == 0 or > 1
         if len(self.session.values) == 1:
-            record = self.session.values[0]
+            record = self.session.values.pop()
             self.history.appendRecord(record)
 
         # end session
@@ -65,7 +67,7 @@ class Beacon:
 
     def run(self, stopEvent):
         while not stopEvent.is_set():
-            msg = self.socket.receive(self.id)
+            msg = self.socket.receive()
 
             if not msg and not self.session:
                 continue
@@ -83,7 +85,7 @@ class Beacon:
                 self.session.round += 1
 
             # decide after f + 1 round
-            if self.session.round > self.f:
+            if self.session and self.session.round > self.f:
                 self.decide()
 
             if not msg:
@@ -104,7 +106,7 @@ class Beacon:
                 if self.session.round < self.f:
                     newMsg = copy.deepcopy(msg)
                     # sign the message
-                    sig = sigManager.sign(msg.signatures[-1][1], self.priKey)
+                    sig = self.sigManager.sign(msg.signatures[-1][1], self.priKey)
                     newMsg.signatures.append([self.cert, sig])
                     self.session.roundMsgQueue.append(newMsg)
 
@@ -117,7 +119,7 @@ class Beacon:
             sessionId = uuid.uuid4()
             startTime = datetime.now()
             msg = Message(self.id, sessionId, startTime, record, [])
-            sig = sigManager.sign(msg, self.priKey)
+            sig = self.sigManager.sign(msg, self.priKey)
             msg.signatures.append([self.cert, sig])
             self.session = Session(sessionId, startTime, 0, set([record]))
             self.broadcast(msg)

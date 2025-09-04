@@ -1,10 +1,13 @@
+import hashlib
+
 class Signature:
     def __init__(self, sig, nonce):
         self.sig = sig
         self.nonce = nonce
 
     def digest(self):
-        return f"{self.sig}{self.nonce}".encode()
+        b = f"{self.sig}{self.nonce}".encode()
+        return hashlib.sha256(b).digest()
 
 
 class SigManager:
@@ -22,6 +25,8 @@ class SigManager:
         return Signature(sig, nonce)
 
     def verify(self, message, signature, key):
+        if not key.e or not key.n:
+            return False
         digest = message.digest()
         digest += signature.nonce.to_bytes(8, 'big')
         sig = pow(signature.sig, key.e, key.n)

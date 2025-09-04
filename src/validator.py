@@ -25,10 +25,10 @@ class Validator:
         signers = set()
         for sig in message.signatures:
             sigCert = sig[0]
-            if sigCert.id not in self.peers or sigCert.id == self.id:
+            if sigCert.id not in peers or sigCert.id == nodeId:
                 return False
             # ensure peer cert is signed by the trusted CA
-            if not self.sigManager.verify(sigCert, sigCert.sig, self.ca.key()):
+            if not sigCert.sig or not self.sigManager.verify(sigCert, sigCert.sig, self.ca.key()):
                 return False
             if sigCert.id in signers:
                 return False
