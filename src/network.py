@@ -9,14 +9,10 @@ class Socket:
     def receive(self):
         return self.network.receive(self.src)
 
-    def maxDelay(self):
-        return self.network.maxDelay()
-
 
 class Network:
-    def __init__(self, maxDelay):
+    def __init__(self):
         self.messages = {}
-        self.maxDelay = maxDelay
 
     def send(self, msg, dst):
         if dst not in self.messages:
@@ -30,5 +26,5 @@ class Network:
                 return self.messages[addr].pop(0)
         return None
 
-    def maxDelay(self):
-        return self.maxDelay
+    def createSocket(self, src):
+        return Socket(self, src)

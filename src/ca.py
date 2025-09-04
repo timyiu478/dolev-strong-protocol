@@ -1,5 +1,5 @@
 class Certificate:
-    def __init__(self, id, key, signer):
+    def __init__(self, id, key):
         self.id = id
         self.key = key
         self.sig = None  # signature of the certificate
@@ -8,7 +8,7 @@ class Certificate:
         return f"{self.id}{self.key.e}{self.key.n}".encode()
 
 
-class CA:
+class CertAuthority:
     def __init__(self, pubKey, priKey, sigManager):
         self.pubKey = pubKey
         self.priKey = priKey

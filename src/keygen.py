@@ -1,10 +1,12 @@
-from sympy import primerange, randprime
+from sympy import randprime
+
 
 class Key:
     def __init__(self, d, e, n):
         self.d = d
         self.e = e
         self.n = n
+
 
 def genKeyPair():
     p = randprime(2**300, 2**500)
@@ -14,5 +16,5 @@ def genKeyPair():
     e = 65537  # Common choice for e
     d = pow(e, -1, phi)
 
-    return Key(None, e, n), Key(d, None, n) # public and private keys
+    return Key(None, e, n), Key(d, None, n)  # public and private keys
 

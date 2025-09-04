@@ -8,9 +8,9 @@ class Executor:
         self.recordPattern = recordPattern
         self.head = 0
 
-    def run(self):
+    def run(self, stopEvent):
         # recordPattern = r"([+-*/]):(\d+)"
-        while True:
+        while not stopEvent.is_set():
             if self.head < len(self.history):
                 record = self.history.getRecord(self.head)
                 self.apply(record)
