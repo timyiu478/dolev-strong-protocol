@@ -56,8 +56,8 @@ class TestValidator(unittest.TestCase):
         msg = DummyMsg(sender, sessionId, record, [])
         # Simulate valid signature chain with length 2
         sig = self.sigMan.sign(msg, self.peer_keys[sender])
-        sig2 = self.sigMan.sign(sig, self.peer_keys[self.peers[1]])
-        msg.signatures = [[self.peer_certs[sender], sig], [self.peer_certs[self.peers[1]], sig2]]
+        sig2 = self.sigMan.sign(sig, self.peer_keys[self.peers[2]])
+        msg.signatures = [[self.peer_certs[sender], sig], [self.peer_certs[self.peers[2]], sig2]]
         validator = Validator(self.recordPattern, self.clock, self.ca, self.sigMan)
         result = validator.validate(msg, self.node_id, self.peers)
         self.assertTrue(result)
