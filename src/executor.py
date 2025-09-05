@@ -1,5 +1,6 @@
 import re
 import logging
+import time
 
 
 class Executor:
@@ -16,6 +17,7 @@ class Executor:
                 record = self.history.getRecord(self.head)
                 self.apply(record)
                 self.head += 1
+            time.sleep(1)
 
     def apply(self, record):
         match = re.search(self.recordPattern, record)

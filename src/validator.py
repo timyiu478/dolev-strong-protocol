@@ -1,25 +1,24 @@
-from datetime import datetime
-
 import re
-import logging
 
 
 class Validator:
-    def __init__(self, recordPattern, ca, sigManager):
+    def __init__(self, recordPattern, clock, ca, sigManager):
         self.recordPattern = recordPattern
+        self.clock = clock
         self.ca = ca
         self.sigManager = sigManager
         self.validCerts = set()
 
-    def validate(self, message, roundTW, nodeId, peers):
+    def validate(self, message, nodeId, peers):
+        if not message or not message.record:
+            return False
         # validate the record pattern
         if not re.match(self.recordPattern, message.record):
-            logging.error(f"Invalid record pattern from {message.sender}")
             return False
 
-        # message with k-length signature chains should sent in round k-1
-        round = (datetime.now() - message.startTime) // roundTW
-        if len(message.signatures) != round + 1:
+        # message with k-length signature chains should be received in round k
+        round = self.clock.now()
+        if len(message.signatures) != round:
             return False
 
         # ensure signatures are signed by k distinct peers
@@ -39,7 +38,7 @@ class Validator:
 
         # verify signature chain
         for i in range(len(message.signatures)):
-            target = message.signature[i-1][1] if i > 0 else message
+            target = message.signatures[i-1][1] if i > 0 else message
             sigCert = message.signatures[i][0]
             targetSig = message.signatures[i][1]
             # ensure the first signer of the signature chain is the leader

@@ -4,9 +4,9 @@ from beacon import Beacon
 
 
 class FaultyBeacon(Beacon):
-    def __init__(self, history, id, peers, leader, roundTW, f,
+    def __init__(self, history, id, peers, leader, clock, f,
                  cert, priKey, validator, sigManager, socket, recordPattern):
-        super().__init__(history, id, peers, leader, roundTW, f
+        super().__init__(history, id, peers, leader, clock, f
                          , cert, priKey, validator, sigManager, socket)
         self.recordPattern = recordPattern
         self.msgCount = 0
@@ -40,4 +40,3 @@ class FaultyBeacon(Beacon):
                 self.socket.send(message.copy(), peer)
             else:
                 self.socket.send(randMsg.copy(), peer)
-

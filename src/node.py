@@ -11,7 +11,7 @@ import threading
 
 
 class Node:
-    def __init__(self, id, peers, leader, roundTW, recordPattern,
+    def __init__(self, id, peers, leader, clock, recordPattern,
                  historyFileName, f, sigManager, ca, network, isFaulty):
         pubKey, priKey = genKeyPair()
         cert = Certificate(id, pubKey)
@@ -20,13 +20,13 @@ class Node:
         socket = network.createSocket(id)
 
         self.history = History(historyFileName)
-        self.validator = Validator(recordPattern, ca, sigManager)
+        self.validator = Validator(recordPattern, clock, ca, sigManager)
         self.beacon = None
         if isFaulty:
-            self.beacon = FaultyBeacon(self.history, id, peers, leader, roundTW
+            self.beacon = FaultyBeacon(self.history, id, peers, leader, clock
                     , f, cert, priKey, self.validator, sigManager, socket, recordPattern)
         else:
-            self.beacon = Beacon(self.history, id, peers, leader, roundTW, f
+            self.beacon = Beacon(self.history, id, peers, leader, clock, f
                         , cert, priKey, self.validator, sigManager, socket)
         self.executor = Executor(self.history, recordPattern)
 

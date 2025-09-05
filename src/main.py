@@ -6,6 +6,7 @@ from ca import CertAuthority
 from sigManager import SigManager
 from node import Node
 from network import Network
+from clock import Clock
 
 import threading
 import time
@@ -13,10 +14,10 @@ import time
 
 CLEARHISTORY = True
 PEERS = [0, 1, 2, 3]
-FAULTYNODES = [0, 1]
+FAULTYNODES = [1, 2]
 F = 2
-LEADER = 0
-ROUNDTW = timedelta(seconds=5)
+LEADER = 0  # fixed leader mode
+ROUNDTW = timedelta(seconds=4)
 RECORDPATTERN = r"([+\-\*/]):(\d+)"
 RECORDS = [
   "+:1",
@@ -33,7 +34,8 @@ RECORDS = [
 
 def main():
     sigMan = SigManager()
-    net = Network(PEERS)
+    clock = Clock(ROUNDTW, F)
+    net = Network(clock, PEERS, F)
     caPubKey, caPriKey = genKeyPair()
     certAuth = CertAuthority(caPubKey, caPriKey, sigMan)
     nodes = {}
@@ -45,9 +47,13 @@ def main():
             with open(f"history/{id}.txt", "w"):
                 pass
 
+    # run network
+    netThread = threading.Thread(target=net.run, args=(stopEvent,))
+    netThread.start()
+
     for id in PEERS:
-        isFaulty = True if id not in FAULTYNODES else False
-        node = Node(id, PEERS, LEADER, ROUNDTW, RECORDPATTERN
+        isFaulty = True if id in FAULTYNODES else False
+        node = Node(id, PEERS, LEADER, clock, RECORDPATTERN
                 , f"history/{id}.txt", F, sigMan, certAuth, net, isFaulty)
         nodes[id] = node
         nodeThreads.append(threading.Thread(target=node.run, args=(stopEvent,)))
@@ -56,7 +62,7 @@ def main():
     for record in RECORDS:
         nodes[LEADER].beacon.start(record)
 
-    time.sleep(ROUNDTW.total_seconds() * (F + 1) * (len(RECORDS) + 1))
+    time.sleep(ROUNDTW.total_seconds() * (F + 2) * (len(RECORDS) + 1))
 
     # check the honest nodes
     for id in PEERS:
@@ -70,6 +76,7 @@ def main():
 
     for t in nodeThreads:
         t.join()
+    netThread.join()
 
 
 if __name__ == "__main__":

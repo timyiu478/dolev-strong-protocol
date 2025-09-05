@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import hashlib
 import uuid
 import logging
@@ -7,25 +5,20 @@ import copy
 
 
 class Session:
-    def __init__(self, sessionId, startTime, round, values):
+    def __init__(self, sessionId, values):
         self.sessionId = sessionId
-        self.startTime = startTime
-        self.round = round  # start from 0
         self.values = values  # accepted values
-        self.roundMsgQueue = []  # messages to be broadcasted
 
 
 class Message:
-    def __init__(self, sender, sessionId, startTime, record, signatures):
+    def __init__(self, sender, sessionId, record, signatures):
         self.sender = sender
         self.sessionId = sessionId
-        self.startTime = startTime
         self.record = record
         self.signatures = signatures  # signature chain
 
     def digest(self):
-        b = f"{self.sender}{self.sessionId}{self.startTime}\
-                {self.record}".encode()
+        b = f"{self.sender}{self.sessionId}{self.record}".encode()
         return hashlib.sha256(b).digest()
 
     def copy(self):
@@ -33,13 +26,13 @@ class Message:
 
 
 class Beacon:
-    def __init__(self, history, id, peers, leader, roundTW, f,
+    def __init__(self, history, id, peers, leader, clock, f,
                  cert, priKey, validator, sigManager, socket):
         self.history = history
         self.id = id
         self.peers = peers
-        self.leader = leader  # fixed leader mode
-        self.roundTW = roundTW  # round time window > message broadcast delay
+        self.leader = leader
+        self.clock = clock
         self.f = f  # number of byzantine node
         self.cert = cert
         self.priKey = priKey
@@ -70,61 +63,51 @@ class Beacon:
 
     def run(self, stopEvent):
         while not stopEvent.is_set():
-            msg = self.socket.receive()
+            round = self.clock.now()
 
-            if not msg and not self.session:
-                continue
-
-            # broadcast prevoius round recieved accepted messages
-            if self.session:
-                s = self.session
-                now = datetime.now()
-                roundEndTime = s.startTime + (s.round + 1) * self.roundTW
-                nextRoundEndTime = roundEndTime + self.roundTW
-                if now > roundEndTime and now < nextRoundEndTime:
-                    for msg in self.session.roundMsgQueue:
-                        self.broadcast(msg)
-                    self.session.roundMsgQueue.clear()
-                self.session.round += 1
-
-            # decide after f + 1 round
-            if self.session and self.session.round > self.f:
+            # decide after f + 1 round = 0 round in next cycle
+            if self.session and round == 0:
                 self.decide()
+
+            msg = self.socket.receive()
 
             if not msg:
                 continue
 
-            if self.validator.validate(msg, self.roundTW, self.id, self.peers):
-                if self.session and self.session.sessionId != msg.sessionId:
+            if self.validator.validate(msg, self.id, self.peers):
+                if not self.session and round == 1:
+                    self.session = Session(msg.sessionId, set())
+                elif not self.session:
                     continue
-                if not self.session:
-                    round = (datetime.now() - msg.startTime) // self.roundTW
-                    self.session = Session(msg.sessionId, msg.startTime, round, set())
-                if len(self.session.roundMsgQueue) >= 2:
+                if self.session.sessionId != msg.sessionId:
+                    continue
+                if len(self.session.values) >= 2:
                     continue
                 if msg.record in self.session.values:
                     continue
                 # accept new record
                 self.session.values.add(msg.record)
-                if self.session.round < self.f:
+                if round <= self.f:
                     newMsg = msg.copy()
                     # sign the message
                     sig = self.sigManager.sign(msg.signatures[-1][1], self.priKey)
                     newMsg.signatures.append([self.cert, sig])
-                    self.session.roundMsgQueue.append(newMsg)
+                    # broadcast message
+                    self.broadcast(newMsg)
 
     def start(self, record):
         if self.leader != self.id:
             logging.error("Only leader can start the protocol")
             return
 
-        if not self.session:
+        round = self.clock.now()
+
+        if not self.session and round == 0:
             sessionId = uuid.uuid4()
-            startTime = datetime.now()
-            msg = Message(self.id, sessionId, startTime, record, [])
+            msg = Message(self.id, sessionId, record, [])
             sig = self.sigManager.sign(msg, self.priKey)
             msg.signatures.append([self.cert, sig])
-            self.session = Session(sessionId, startTime, 0, set([record]))
+            self.session = Session(sessionId, set([]))
             self.broadcast(msg)
         else:
             self.broadcastQueue.append(record)
