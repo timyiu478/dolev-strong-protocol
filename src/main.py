@@ -14,10 +14,10 @@ import time
 
 CLEARHISTORY = True
 PEERS = [0, 1, 2, 3]
-FAULTYNODES = [1, 2]
+FAULTYNODES = [0, 1]
 F = 2
 LEADER = 0  # fixed leader mode
-ROUNDTW = timedelta(seconds=4)
+ROUNDTW = timedelta(seconds=3)
 RECORDPATTERN = r"([+\-\*/]):(\d+)"
 RECORDS = [
   "+:1",
@@ -59,18 +59,22 @@ def main():
         nodeThreads.append(threading.Thread(target=node.run, args=(stopEvent,)))
         nodeThreads[-1].start()
 
+    # wait for all nodes to start
+    time.sleep(2)
+
     for record in RECORDS:
         nodes[LEADER].beacon.start(record)
 
-    time.sleep(ROUNDTW.total_seconds() * (F + 2) * (len(RECORDS) + 1))
-
-    # check the honest nodes
-    for id in PEERS:
-        if id not in FAULTYNODES:
-            reg = nodes[id].executor.register
-            history = nodes[id].history.getHistory()
-            print(f"Node {id}'s register value is {reg}")
-            print(f"Node {id}'s history is {history}")
+    while clock.cycle() <= len(RECORDS):
+        if clock.now() == 0:
+            # check the honest nodes
+            for id in PEERS:
+                if id not in FAULTYNODES:
+                    reg = nodes[id].executor.register
+                    history = nodes[id].history.getHistory()
+                    print(f"Node {id}'s register value is {reg}")
+                    print(f"Node {id}'s history is {history}")
+        time.sleep(ROUNDTW.total_seconds())
 
     stopEvent.set()
 

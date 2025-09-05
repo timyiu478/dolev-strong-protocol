@@ -1,4 +1,5 @@
 import rstr
+import time
 
 from beacon import Beacon
 
@@ -10,6 +11,14 @@ class FaultyBeacon(Beacon):
                          , cert, priKey, validator, sigManager, socket)
         self.recordPattern = recordPattern
         self.msgCount = 0
+
+    def run(self, stopEvent):
+        # if it is non-sender, do nothing
+        if self.id != self.leader:
+            while not stopEvent.is_set():
+                time.sleep(2)
+        else:
+            super().run(stopEvent)
 
     def broadcast(self, message):
         # if it is non-sender, do nothing

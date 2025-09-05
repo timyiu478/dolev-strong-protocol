@@ -2,6 +2,9 @@ import hashlib
 import uuid
 import logging
 import copy
+import threading
+
+from queue import Queue
 
 
 class Session:
@@ -40,7 +43,7 @@ class Beacon:
         self.sigManager = sigManager
         self.socket = socket  # for communicating with the synchronous network
         self.session = None  # session data
-        self.broadcastQueue = []
+        self.broadcastQueue = Queue()
 
     def broadcast(self, message):
         for peer in self.peers:
@@ -56,22 +59,30 @@ class Beacon:
         # end session
         self.session = None
 
-        # broadcast the next record
-        if self.leader == self.id and len(self.broadcastQueue) > 0:
-            record = self.broadcastQueue.pop(0)
-            self.start(record)
-
     def run(self, stopEvent):
         while not stopEvent.is_set():
             round = self.clock.now()
 
-            # decide after f + 1 round = 0 round in next cycle
-            if self.session and round == 0:
+            # decide after f + 1 round
+            if self.session and round > (self.f + 1):
                 self.decide()
+
+            # leader starts the protocol if has record to broadcast
+            if round == 0 and self.leader == self.id and not self.session and not self.broadcastQueue.empty():
+                record = self.broadcastQueue.get()
+                self.start(record)
+            elif round == 0 and self.leader != self.id:
+                # do nothing in round 0 if it is not the leader
+                continue
+            elif round > 0 and self.leader == self.id:
+                continue
 
             msg = self.socket.receive()
 
             if not msg:
+                continue
+
+            if msg.record and self.session and msg.record in self.session.values:
                 continue
 
             if self.validator.validate(msg, self.id, self.peers):
@@ -82,8 +93,6 @@ class Beacon:
                 if self.session.sessionId != msg.sessionId:
                     continue
                 if len(self.session.values) >= 2:
-                    continue
-                if msg.record in self.session.values:
                     continue
                 # accept new record
                 self.session.values.add(msg.record)
@@ -100,14 +109,16 @@ class Beacon:
             logging.error("Only leader can start the protocol")
             return
 
-        round = self.clock.now()
+        lock = threading.Lock()
+        with lock:
+            round = self.clock.now()
 
-        if not self.session and round == 0:
-            sessionId = uuid.uuid4()
-            msg = Message(self.id, sessionId, record, [])
-            sig = self.sigManager.sign(msg, self.priKey)
-            msg.signatures.append([self.cert, sig])
-            self.session = Session(sessionId, set([]))
-            self.broadcast(msg)
-        else:
-            self.broadcastQueue.append(record)
+            if not self.session and round == 0:
+                sessionId = uuid.uuid4()
+                msg = Message(self.id, sessionId, record, [])
+                sig = self.sigManager.sign(msg, self.priKey)
+                msg.signatures.append([self.cert, sig])
+                self.session = Session(sessionId, set([record]))
+                self.broadcast(msg)
+            else:
+                self.broadcastQueue.put(record)
