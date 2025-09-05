@@ -6,6 +6,8 @@ This repository shares my implementation of a toy state machine replication buil
 
 ## Overall Design
 
+
+
 ---
 
 ## Example Run
@@ -24,7 +26,7 @@ Node 3's history is []
 ### Attack Strategies
 
 - non-sender: does not participate in the protocol
-- sender: send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
+- sender: sometime, send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
 
 ### Case 1: 2 Honest Nodes, 2 Faulty Nodes, 1 is the sender and 1 is the non-sender
 
@@ -37,6 +39,8 @@ Node 3's history is []
 ---
 
 ## Dolev-Strong protocol
+
+The dolev-Strong protocol is an authenticated protocol for solving broadcast, against any adversary controlling *t<n* out of *n* parties, in *t+1* rounds.
 
 ### Assumptions
 
