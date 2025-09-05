@@ -31,13 +31,12 @@ class TestValidator(unittest.TestCase):
     def setUp(self):
         self.peers = [1, 2, 3]
         self.leader = 1
-        self.roundTW = timedelta(seconds=1)
         self.recordPattern = r"([+\-\*/]):(\d+)"
         self.sigMan = SigManager()
         pubKey, priKey = genKeyPair()
         self.ca = CertAuthority(pubKey, priKey, self.sigMan)
         self.node_id = 2
-        self.clock = DummyClock(round=1)
+        self.clock = DummyClock(round=2)
 
         # Each peer gets their own keypair and certificate
         self.peer_keys = {}
@@ -55,9 +54,10 @@ class TestValidator(unittest.TestCase):
         startTime = datetime.now()
         record = "+:42"
         msg = DummyMsg(sender, sessionId, record, [])
-        # Simulate valid signature chain
+        # Simulate valid signature chain with length 2
         sig = self.sigMan.sign(msg, self.peer_keys[sender])
-        msg.signatures = [[self.peer_certs[sender], sig]]
+        sig2 = self.sigMan.sign(sig, self.peer_keys[self.peers[1]])
+        msg.signatures = [[self.peer_certs[sender], sig], [self.peer_certs[self.peers[1]], sig2]]
         validator = Validator(self.recordPattern, self.clock, self.ca, self.sigMan)
         result = validator.validate(msg, self.node_id, self.peers)
         self.assertTrue(result)
