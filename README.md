@@ -8,6 +8,24 @@ This repository shares my implementation of a toy state machine replication buil
 
 ---
 
+## Example Run
+
+### Attack Strategies
+
+- non-sender: does not participate in the protocol
+- sender: send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
+
+### Case 1: 2 Faulty Nodes, 1 is the sender and 1 is the non-sender
+
+![2_f_n_1_sender.gif](recording/2_faulty_node_1_sender_1_non_sender.gif)
+
+
+### Case 2: 2 Faulty Nodes, both are non-senders
+
+![2_f_n_both_non_senders.gif](recording/2_faulty_node_2_non_senders.gif)
+
+---
+
 ## Dolev-Strong protocol
 
 ### Assumptions
