@@ -6,7 +6,7 @@ This repository shares my implementation of a toy state machine replication buil
 
 ## Overall Design
 
-
+![](assets/overall_design.png)
 
 ---
 
