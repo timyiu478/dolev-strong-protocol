@@ -14,7 +14,7 @@ This repository shares my implementation of a toy state machine replication buil
 
 ### Understand The Output
 
-The program will output the register value and history of each honest node for each dolev-strong protocol cycle:
+The program will output the register value and history(append-only log) of each honest node for each dolev-strong protocol cycle. We should see that all honest nodes have the same register value and history at the end of each cycle.
 
 ```bash
 Node 0's register value is 0
