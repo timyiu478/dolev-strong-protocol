@@ -40,7 +40,7 @@ class FaultyBeacon(Beacon):
         randMsg = message.copy()
         randMsg.record = rstr.xeger(self.recordPattern)
         sig = self.sigManager.sign(randMsg, self.priKey)
-        randMsg.signatures = [self.cert, sig]
+        randMsg.signatures = [[self.cert, sig]]
         for i in range(len(self.peers)):
             peer = self.peers[i]
             if peer == self.id:

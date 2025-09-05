@@ -14,12 +14,21 @@ import time
 
 CLEARHISTORY = True
 PEERS = [0, 1, 2, 3]
-FAULTYNODES = [0, 1]
+FAULTYNODES = [1, 2]
 F = 2
 LEADER = 0  # fixed leader mode
-ROUNDTW = timedelta(seconds=3)
+ROUNDTW = timedelta(seconds=1)
 RECORDPATTERN = r"([+\-\*/]):(\d+)"
 RECORDS = [
+  "+:1",
+  "-:2",
+  "*:3",
+  "/:4",
+  "+:5",
+  "-:6",
+  "*:7",
+  "/:8",
+  "+:9",
   "+:1",
   "-:2",
   "*:3",
