@@ -4,6 +4,7 @@ from ca import Certificate
 from history import History
 from validator import Validator
 from beacon import Beacon
+from byzantine import FaultyBeacon
 from executor import Executor
 
 import threading
@@ -11,16 +12,22 @@ import threading
 
 class Node:
     def __init__(self, id, peers, leader, roundTW, recordPattern,
-                 historyFileName, f, sigManager, ca, network):
+                 historyFileName, f, sigManager, ca, network, isFaulty):
         pubKey, priKey = genKeyPair()
         cert = Certificate(id, pubKey)
         cert.sig = ca.sign(cert)
+
         socket = network.createSocket(id)
 
         self.history = History(historyFileName)
         self.validator = Validator(recordPattern, ca, sigManager)
-        self.beacon = Beacon(self.history, id, peers, leader, roundTW,
-                f, cert, priKey, self.validator, sigManager, socket)
+        self.beacon = None
+        if isFaulty:
+            self.beacon = FaultyBeacon(self.history, id, peers, leader, roundTW
+                    , f, cert, priKey, self.validator, sigManager, socket, recordPattern)
+        else:
+            self.beacon = Beacon(self.history, id, peers, leader, roundTW, f
+                        , cert, priKey, self.validator, sigManager, socket)
         self.executor = Executor(self.history, recordPattern)
 
     def run(self, stopEvent):

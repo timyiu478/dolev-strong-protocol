@@ -28,6 +28,9 @@ class Message:
                 {self.record}".encode()
         return hashlib.sha256(b).digest()
 
+    def copy(self):
+        return copy.deepcopy(self)
+
 
 class Beacon:
     def __init__(self, history, id, peers, leader, roundTW, f,
@@ -49,7 +52,7 @@ class Beacon:
     def broadcast(self, message):
         for peer in self.peers:
             if peer != self.id:
-                self.socket.send(copy.deepcopy(message), peer)
+                self.socket.send(message.copy(), peer)
 
     def decide(self):
         # decide to append nothing if |accepted values| == 0 or > 1
@@ -76,7 +79,7 @@ class Beacon:
             if self.session:
                 s = self.session
                 now = datetime.now()
-                roundEndTime = s.startTime + s.round * self.roundTW
+                roundEndTime = s.startTime + (s.round + 1) * self.roundTW
                 nextRoundEndTime = roundEndTime + self.roundTW
                 if now > roundEndTime and now < nextRoundEndTime:
                     for msg in self.session.roundMsgQueue:
@@ -104,7 +107,7 @@ class Beacon:
                 # accept new record
                 self.session.values.add(msg.record)
                 if self.session.round < self.f:
-                    newMsg = copy.deepcopy(msg)
+                    newMsg = msg.copy()
                     # sign the message
                     sig = self.sigManager.sign(msg.signatures[-1][1], self.priKey)
                     newMsg.signatures.append([self.cert, sig])

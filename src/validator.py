@@ -9,6 +9,7 @@ class Validator:
         self.recordPattern = recordPattern
         self.ca = ca
         self.sigManager = sigManager
+        self.validCerts = set()
 
     def validate(self, message, roundTW, nodeId, peers):
         # validate the record pattern
@@ -27,12 +28,14 @@ class Validator:
             sigCert = sig[0]
             if sigCert.id not in peers or sigCert.id == nodeId:
                 return False
-            # ensure peer cert is signed by the trusted CA
-            if not sigCert.sig or not self.sigManager.verify(sigCert, sigCert.sig, self.ca.key()):
-                return False
-            if sigCert.id in signers:
-                return False
-            signers.add(sigCert.id)
+            if sigCert not in self.validCerts:
+                # ensure peer cert is signed by the trusted CA
+                if not sigCert.sig or not self.sigManager.verify(sigCert, sigCert.sig, self.ca.key()):
+                    return False
+                if sigCert.id in signers:
+                    return False
+                signers.add(sigCert.id)
+                self.validCerts.add(sigCert)
 
         # verify signature chain
         for i in range(len(message.signatures)):

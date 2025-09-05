@@ -11,18 +11,23 @@ import threading
 import time
 
 
-PEERS = [0, 1, 2, 3, 4]
+CLEARHISTORY = True
+PEERS = [0, 1, 2, 3]
+FAULTYNODES = [0, 1]
 F = 2
 LEADER = 0
-ROUNDTW = timedelta(seconds=8)
+ROUNDTW = timedelta(seconds=5)
 RECORDPATTERN = r"([+\-\*/]):(\d+)"
 RECORDS = [
   "+:1",
-  "-:1",
-  "+:1",
-  "*:9",
-  "*:2",
-  "/:18"
+  "-:2",
+  "*:3",
+  "/:4",
+  "+:5",
+  "-:6",
+  "*:7",
+  "/:8",
+  "+:9",
 ]
 
 
@@ -35,9 +40,15 @@ def main():
     nodeThreads = []
     stopEvent = threading.Event()
 
+    if CLEARHISTORY:
+        for id in PEERS:
+            with open(f"history/{id}.txt", "w"):
+                pass
+
     for id in PEERS:
+        isFaulty = True if id not in FAULTYNODES else False
         node = Node(id, PEERS, LEADER, ROUNDTW, RECORDPATTERN
-                , f"history/{id}.txt", F, sigMan, certAuth, net)
+                , f"history/{id}.txt", F, sigMan, certAuth, net, isFaulty)
         nodes[id] = node
         nodeThreads.append(threading.Thread(target=node.run, args=(stopEvent,)))
         nodeThreads[-1].start()
@@ -45,7 +56,15 @@ def main():
     for record in RECORDS:
         nodes[LEADER].beacon.start(record)
 
-    time.sleep(ROUNDTW.total_seconds() * (F + 2) * (len(RECORDS) + 1))
+    time.sleep(ROUNDTW.total_seconds() * (F + 1) * (len(RECORDS) + 1))
+
+    # check the honest nodes
+    for id in PEERS:
+        if id not in FAULTYNODES:
+            reg = nodes[id].executor.register
+            history = nodes[id].history.getHistory()
+            print(f"Node {id}'s register value is {reg}")
+            print(f"Node {id}'s history is {history}")
 
     stopEvent.set()
 

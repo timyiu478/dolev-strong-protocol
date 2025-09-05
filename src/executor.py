@@ -1,6 +1,7 @@
 import re
 import logging
 
+
 class Executor:
     def __init__(self, history, recordPattern):
         self.register = 0
