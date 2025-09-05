@@ -10,6 +10,17 @@ This repository shares my implementation of a toy state machine replication buil
 
 ---
 
+## Repo Structure
+
+```
+- **src/**: Contains the main source code for the protocol and state machine.
+- **main.py**: Run this script to start a protocol simulation.
+- **tests/**: Includes test cases for validating protocol correctness.
+- **assets/** & **recording/**: Visual resources for documentation and examples.
+```
+
+---
+
 ## Example Run
 
 ### Understand The Output
