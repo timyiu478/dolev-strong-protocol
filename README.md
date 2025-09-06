@@ -58,7 +58,7 @@ The dolev-Strong protocol is an authenticated protocol for solving broadcast, ag
 1. **Permissioned**: a prior known set of nodes $\{1, 2, 3, ..., n\}$.
 1. **Public Key Infrastructure**: each node has a pair of $pk_i$, $sk_i$ where $pk_i$ is known to all nodes upfront.
 1. **Synchronous Network**: 
-    1. all nodes share a global clock, time steps from $0, 1, 2, ...$.
+    1. all nodes share a global clock, time steps from $\{0, 1, 2, ...\}$.
     1. the message sent from time $t$ will be arrived at time $t+1$ (in some arbitrary order).
 1. **Node Failure**: there are $f$ number of nodes that can be byzantine.
 
