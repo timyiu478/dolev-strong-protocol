@@ -5,9 +5,9 @@ from beacon import Beacon
 
 
 class FaultyBeacon(Beacon):
-    def __init__(self, history, id, peers, leader, clock, f,
+    def __init__(self, history, id, peers, leader, isFixedLeader, clock, f,
                  cert, priKey, validator, sigManager, socket, recordPattern):
-        super().__init__(history, id, peers, leader, clock, f
+        super().__init__(history, id, peers, leader, isFixedLeader, clock, f
                          , cert, priKey, validator, sigManager, socket)
         self.recordPattern = recordPattern
         self.msgCount = 0
