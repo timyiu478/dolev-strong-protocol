@@ -51,7 +51,7 @@ Node 3's history is []
 
 ### Case 3: 2 Honest Nodes, 2 Faulty Nodes, round-robin leader election mode
 
-
+![rr_leader_election.gif](recording/round_robin_leader_election.gif)
 
 ---
 
