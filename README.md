@@ -37,7 +37,9 @@ Node 3's history is []
 ### Attack Strategies
 
 - non-sender: does not participate in the protocol
-- sender: sometime, send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
+- sender: 
+    - sometime, send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
+    - sometime, it follows the protocol correctly
 
 ### Case 1: 2 Honest Nodes, 2 Faulty Nodes, 1 is the sender and 1 is the non-sender, fixed leader mode
 
