@@ -53,6 +53,8 @@ Node 3's history is []
 
 ![rr_leader_election.gif](recording/round_robin_leader_election.gif)
 
+Occasionally, the register values of honest nodes may differ, but their histories remain identical because the executor has not yet applied the latest record.
+
 ---
 
 ## Dolev-Strong protocol
