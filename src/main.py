@@ -13,9 +13,9 @@ import time
 
 
 CLEARHISTORY = True
-PEERS = [0, 1, 2, 3]
-FAULTYNODES = [1, 2]
-F = 2
+PEERS = [0, 1, 2, 3, 4]
+FAULTYNODES = [1, 2, 3]
+F = 3
 LEADER = 0  # fixed leader id
 ISFIXEDLEADER = False  # fixed leader mode
 ROUNDTW = timedelta(seconds=0.5)

@@ -12,12 +12,10 @@ This repository shares my implementation of a toy state machine replication buil
 
 ## Repo Structure
 
-```
 - **src/**: Contains the main source code for the protocol and state machine.
 - **main.py**: Run this script to start a protocol simulation.
 - **tests/**: Includes test cases for validating protocol correctness.
 - **assets/** & **recording/**: Visual resources for documentation and examples.
-```
 
 ---
 
@@ -25,7 +23,7 @@ This repository shares my implementation of a toy state machine replication buil
 
 ### Understand The Output
 
-The program will output the register value and history(append-only log) of each honest node for each dolev-strong protocol cycle. We should see that all honest nodes have the same register value and history at the end of each cycle.
+The program will output the register value and history(append-only log) of each honest node for each dolev-strong protocol cycle(or epoch). We should see that all honest nodes have the same register value and history at the end of each cycle.
 
 ```bash
 Node 0's register value is 0
@@ -39,7 +37,7 @@ Node 3's history is []
 - non-sender: does not participate in the protocol
 - sender: 
     - sometime, send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
-    - sometime, it follows the protocol correctly
+    - sometime, it follows the protocol correctly (it acts as an honest node)
 
 ### Case 1: 2 Honest Nodes, 2 Faulty Nodes, 1 is the sender and 1 is the non-sender, fixed leader mode
 
