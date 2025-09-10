@@ -16,8 +16,9 @@ CLEARHISTORY = True
 PEERS = [0, 1, 2, 3]
 FAULTYNODES = [1, 2]
 F = 2
-LEADER = 0  # fixed leader mode
-ROUNDTW = timedelta(seconds=1)
+LEADER = 0  # fixed leader id
+ISFIXEDLEADER = False  # fixed leader mode
+ROUNDTW = timedelta(seconds=0.5)
 RECORDPATTERN = r"([+\-\*/]):(\d+)"
 RECORDS = [
   "+:1",
@@ -62,7 +63,7 @@ def main():
 
     for id in PEERS:
         isFaulty = True if id in FAULTYNODES else False
-        node = Node(id, PEERS, LEADER, clock, RECORDPATTERN
+        node = Node(id, PEERS, LEADER, ISFIXEDLEADER, clock, RECORDPATTERN
                 , f"history/{id}.txt", F, sigMan, certAuth, net, isFaulty)
         nodes[id] = node
         nodeThreads.append(threading.Thread(target=node.run, args=(stopEvent,)))
@@ -72,15 +73,18 @@ def main():
     time.sleep(2)
 
     for record in RECORDS:
-        nodes[LEADER].beacon.start(record)
+        for id in PEERS:
+            nodes[id].beacon.start(record)
 
-    while clock.cycle() <= len(RECORDS):
+    while clock.cycle() <= len(RECORDS) * len(PEERS):
         if clock.now() == 0:
             # check the honest nodes
             for id in PEERS:
                 if id not in FAULTYNODES:
                     reg = nodes[id].executor.register
                     history = nodes[id].history.getHistory()
+                    leader = nodes[id].beacon.leader
+                    print(f"Node {id}'s leader is {leader}")
                     print(f"Node {id}'s register value is {reg}")
                     print(f"Node {id}'s history is {history}")
         time.sleep(ROUNDTW.total_seconds())

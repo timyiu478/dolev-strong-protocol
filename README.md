@@ -37,15 +37,23 @@ Node 3's history is []
 ### Attack Strategies
 
 - non-sender: does not participate in the protocol
-- sender: sometime, send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
+- sender: 
+    - sometime, send value $v1$ to half of the non-senders and send value $v2$ to another half of the non-senders
+    - sometime, it follows the protocol correctly
 
-### Case 1: 2 Honest Nodes, 2 Faulty Nodes, 1 is the sender and 1 is the non-sender
+### Case 1: 2 Honest Nodes, 2 Faulty Nodes, 1 is the sender and 1 is the non-sender, fixed leader mode
 
 ![2_f_n_1_sender.gif](recording/2_faulty_node_1_sender_1_non_sender.gif)
 
-### Case 2: 2 Honest Nodes, 2 Faulty Nodes, both are non-senders
+### Case 2: 2 Honest Nodes, 2 Faulty Nodes, both are non-senders, fixed leader mode
 
 ![2_f_n_both_non_senders.gif](recording/2_faulty_node_2_non_senders.gif)
+
+### Case 3: 2 Honest Nodes, 2 Faulty Nodes, round-robin leader election mode
+
+![rr_leader_election.gif](recording/round_robin_leader_election.gif)
+
+Occasionally, the register values of honest nodes may differ, but their histories remain identical because the executor has not yet applied the latest record.
 
 ---
 

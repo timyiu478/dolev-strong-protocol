@@ -29,12 +29,13 @@ class Message:
 
 
 class Beacon:
-    def __init__(self, history, id, peers, leader, clock, f,
+    def __init__(self, history, id, peers, leader, isFixedLeader, clock, f,
                  cert, priKey, validator, sigManager, socket):
         self.history = history
         self.id = id
         self.peers = peers
         self.leader = leader
+        self.isFixedLeader = isFixedLeader
         self.clock = clock
         self.f = f  # number of byzantine node
         self.cert = cert
@@ -59,6 +60,13 @@ class Beacon:
         # end session
         self.session = None
 
+    def updateLeader(self):
+        if self.isFixedLeader:
+            return
+        n = len(self.peers)
+        cycle = self.clock.cycle()
+        self.leader = self.peers[cycle % n] 
+
     def run(self, stopEvent):
         while not stopEvent.is_set():
             round = self.clock.now()
@@ -66,6 +74,10 @@ class Beacon:
             # decide after f + 1 round
             if self.session and round > (self.f + 1):
                 self.decide()
+
+            # update leader at the beginning of each cycle
+            if round == 0:
+                self.updateLeader()
 
             # leader starts the protocol if has record to broadcast
             if round == 0 and self.leader == self.id and not self.session and not self.broadcastQueue.empty():
@@ -106,7 +118,8 @@ class Beacon:
 
     def start(self, record):
         if self.leader != self.id:
-            logging.error("Only leader can start the protocol")
+            # logging.error("Only leader can start the protocol")
+            self.broadcastQueue.put(record)
             return
 
         lock = threading.Lock()
