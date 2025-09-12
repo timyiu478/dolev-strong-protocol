@@ -37,6 +37,7 @@ class Validator:
                 self.validCerts.add(sigCert)
 
         # verify signature chain
+        # chain provides temporal proof-of-propagation
         for i in range(len(message.signatures)):
             target = message.signatures[i-1][1] if i > 0 else message
             sigCert = message.signatures[i][0]
