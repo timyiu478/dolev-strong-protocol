@@ -8,6 +8,7 @@ This repository shares my implementation of a toy state machine replication buil
 
 ![](assets/overall_design.png)
 
+
 ---
 
 ## Repo Structure

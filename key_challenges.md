@@ -6,4 +6,5 @@ How we solve it:
 
 1. only allowing leader to broadcast a message a round *0*. 
 1. each node shares the same synchronous clock.
-1. the network ensures message sent from round *i* can be received at round *i+1*.
+1. the network ensures message sent from round *i* can be received at round *i+1* (application level).
+    * because the synchronous network ensures message sent from round *i* can be delivered to the node before round *i+1*.
